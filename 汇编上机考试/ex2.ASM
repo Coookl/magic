@@ -1,0 +1,62 @@
+DATA SEGMENT
+    BUF DB  50,?,50 DUP('$')
+    LEN DB  $-BUF
+DATA ENDS
+
+STACK SEGMENT
+
+STACK  ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE,DS:DATA
+    START:
+    MOV AX,DATA
+    MOV DS,AX
+
+    LEA DX,BUF    
+    MOV AH,0AH
+    INT 21H
+    MOV SI,2
+    MOV CL,BUF[1]
+;INPUT
+    MOV DL,0AH
+    MOV AH,02H
+    INT 21H
+;CHECK
+CHECK:
+    MOV AL,BUF[SI]
+    CMP AL,'A'
+    JNB CMPZ
+    INC SI
+    DEC CX
+    CMP CX,0
+    JE  OUTPUT
+    JMP CHECK
+CMPZ:
+    CMP AL,'Z'
+    JNA SUBMIT
+    INC SI
+    DEC CX
+    CMP CX,0
+    JE  OUTPUT
+    JMP CHECK
+SUBMIT:
+    ADD AL,20H
+    MOV BUF[SI],AL
+    INC SI
+    DEC CX
+    CMP CX,0
+    JE  OUTPUT
+    JMP CHECK
+OUTPUT:
+    MOV DL,0DH
+    MOV AH,02H
+    INT 21H
+    LEA DX,BUF[2]
+    MOV AH,09H
+    INT 21H
+
+    MOV AH,4CH
+    INT 21H
+CODE ENDS
+    END START
